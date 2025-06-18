@@ -1,5 +1,9 @@
 #include <Arduino.h>
 
+//ทีมสีน้ำเงิน
+int  delay_team_1 = 1800;    // สไลคขวา - ซ้าย
+int  delay_team_2 = 2500;    // เดินหน้า
+
 // ============================
 // 🔧 PIN DEFINITIONS
 // ============================
@@ -56,18 +60,35 @@ const int SPEED_SLIDE_LEFT   = 100;
 const int SPEED_SLIDE_RIGHT  = 50;
 const int SPEED_TURN_LEFT    = 100;
 const int SPEED_TURN_RIGHT   = 100;
-
-float factor_forward_lf = 1.40;
+/// @brief //////////////////////////////////////////////
+float factor_forward_lf = 1.00;
 float factor_forward_rf = 1.00;
 float factor_forward_lb = 1.00;
 float factor_forward_rb = 1.00;
 
-float factor_backward_lf = 1.00;
-float factor_backward_rf = 1.00;
+
+
+/// @brief //////////////////////////////////////////////
+float factor_backward_lf = 1.00;  //ล้อซ้ายหน้า
+float factor_backward_rf = 1.00;  // ล้อขวาหน้า   
+
+
+
+
+
+
+
 float factor_backward_lb = 1.00;
 float factor_backward_rb = 1.00;
 
+////////////////////////////////////////////////////////////
+
+
+
+
+
 float factor_slide_left_lf = 1.00;
+
 float factor_slide_left_rf = 1.00;
 float factor_slide_left_lb = 1.00;
 float factor_slide_left_rb = 1.00;
@@ -166,18 +187,68 @@ void softBrakeSlideRight(int ms = 100) {
   stopAllWheels();
 }
 
-
-void step1(){
-      slideRight(); 
-      delay(700); //ซ้าย
-      softBrakeSlideRight();
-      
-      moveForward(); 
-      delay(2300); //หน้า
-      softBrakeForward();
-
-      rotateUntilSwitchAndThenReverse();
+void softBrakeSlideLeft(int ms = 100) {
+  slideRight();
+  delay(ms);
+  stopAllWheels();
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// #ทีมสีน้ำเงิน
+
+// #define delay_blue_team_1  = ;
+// #define delay_blue_team_2 = ;
+
+// #ทีมสีแดง
+
+// #define delay_gren_team_1  = ;
+// #define delay_gren_team_2 = ;
+
+
+void step1(){     // ทีมน้ำเงิน
+  slideRight(); 
+  delay(delay_team_1); //สไลค์ขวา
+  softBrakeSlideRight();
+  
+  moveForward(); 
+  delay(delay_team_2); //   เดินหน้า
+  softBrakeForward();
+
+  // moveBackward(); 
+  // delay(500); //ถอยหลัง
+  // stopAllWheels();
+  
+  rotateUntilSwitchAndThenReverse();
+
+  moveBackward(); 
+  delay(1800); //ถอยหลัง
+  stopAllWheels();
+
+}
+
+void step2() {    // ทีมเขียว
+  slideLeft(); 
+  delay(delay_team_1); // สไลค ซ้าย
+  softBrakeSlideLeft();
+
+  moveForward(); 
+  delay(delay_team_2); // เดินหน้า
+  softBrakeForward();
+
+  // moveBackward(); 
+  // delay(500); //ถอยหลัง
+  // stopAllWheels();  
+
+
+  rotateUntilSwitchAndThenReverse();
+
+  moveBackward(); 
+  delay(2000); //ถอยหลัง
+  stopAllWheels();
+}
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
 
 // ============================
@@ -210,24 +281,24 @@ bool isLimitSwitchStableLow() {
 
 void rotateUntilSwitchAndThenReverse() {
   Serial.println("🔄 กำลังหมุน Stepper ไปทางซ้ายจนกว่าจะเจอสวิตช์...");
-  digitalWrite(DIR_PIN, LOW);
-  while (digitalRead(LIMIT_SWITCH_PIN) == LOW) {
-    digitalWrite(STEP_PIN, HIGH);
-    delayMicroseconds(delayMicros);
-    digitalWrite(STEP_PIN, LOW);
-    delayMicroseconds(delayMicros);
-  }
+  // digitalWrite(DIR_PIN, LOW);
+  // while (digitalRead(LIMIT_SWITCH_PIN) == LOW) {
+  //   digitalWrite(STEP_PIN, HIGH);
+  //   delayMicroseconds(delayMicros);
+  //   digitalWrite(STEP_PIN, LOW);
+  //   delayMicroseconds(delayMicros);
+  // }
 
-  Serial.println("🛑 เจอสวิตช์แล้ว → หยุดมอเตอร์");
+  // Serial.println("🛑 เจอสวิตช์แล้ว → หยุดมอเตอร์");
 
-  for (int i = 0; i < 2; i++) {
-    rotateOneRev(true);
-  }
+  // for (int i = 0; i < 2; i++) {
+  //   rotateOneRev(true);
+  // }
 
   digitalWrite(LIFT_PIN, HIGH); delay(3000);
   digitalWrite(PUSH_PIN, HIGH); digitalWrite(MAGNET_PIN, HIGH); 
   delay(5000);
-  digitalWrite(PUSH_PIN, LOW); delay(2000);
+  digitalWrite(PUSH_PIN, LOW); delay(3000);
   digitalWrite(LIFT_PIN, LOW); digitalWrite(MAGNET_PIN, LOW);
 }
 
@@ -271,8 +342,7 @@ void loop() {
   // 🆕 ตรวจสอบ Switch
   digitalWrite(MAGNET_PIN, HIGH); 
   if (digitalRead(SW1_PIN) == LOW) step1();
-
-  // else if (digitalRead(SW2_PIN) == LOW) moveBackward();
+   else if (digitalRead(SW2_PIN) == LOW) step2();
   // else if (digitalRead(SW3_PIN) == LOW) rotateOneRev(true);
   // else if (digitalRead(SW4_PIN) == LOW) stopAllWheels();
    else if (digitalRead(SW5_PIN) == LOW) stopAllWheels();
